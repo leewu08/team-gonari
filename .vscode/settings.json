@@ -1,0 +1,6 @@
+{
+  "files.exclude": {
+    "kerasenv": true,
+    ".vscode": true
+  }
+}

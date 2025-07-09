@@ -1,0 +1,24 @@
+<!-- pages/partials/sidebar.html -->
+<ul class="navbar-nav">
+  {% set nav_items = [
+    ("index", "dashboard", "Dashboard"),
+    ("tables", "table_view", "Tables"),
+    ("billing", "receipt_long", "Billing"),
+    ("vr", "view_in_ar", "Virtual Reality"),
+    ("rtl", "format_textdirection_r_to_l", "RTL"),
+    ("notifications", "notifications", "Notifications"),
+    ("profile", "person", "Profile"),
+    ("sign_in", "login", "Sign In"),
+    ("sign_up", "assignment", "Sign Up"),
+  ] %}
+
+  {% for endpoint, icon, label in nav_items %}
+  <li class="nav-item">
+    <a class="nav-link {% if request.endpoint == endpoint %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}"
+       href="{{ url_for(endpoint) }}">
+      <i class="material-symbols-rounded opacity-5">{{ icon }}</i>
+      <span class="nav-link-text ms-1">{{ label }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
