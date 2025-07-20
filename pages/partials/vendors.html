@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>공급업체 관리</title>
+
+  <!-- Bootstrap CSS + DataTables -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .section-title {
+      border-bottom: 2px solid #333;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .form-section, .table-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+
+    .btn + .btn {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+
+    <!-- 공급업체 등록 -->
+    <div class="form-section">
+      <h3 class="section-title">{{ '공급업체 수정' if edit_vendor else '공급업체 등록' }}</h3>
+      <form method="POST">
+        <input type="hidden" name="mode" value="{{ 'edit' if edit_vendor else 'add' }}">
+        {% if edit_vendor %}
+          <input type="hidden" name="vendors_seq" value="{{ edit_vendor.vendors_seq }}">
+        {% endif %}
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">업체명</label>
+            <input type="text" name="vendors_name" class="form-control" value="{{ edit_vendor.vendors_name if edit_vendor else '' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">담당자</label>
+            <input type="text" name="contact_person" class="form-control" value="{{ edit_vendor.contact_person if edit_vendor else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">전화번호</label>
+            <input type="text" name="phone" class="form-control" value="{{ edit_vendor.phone if edit_vendor else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">주소</label>
+            <input type="text" name="address" class="form-control" value="{{ edit_vendor.address if edit_vendor else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">이메일</label>
+            <input type="email" name="email" class="form-control" value="{{ edit_vendor.email if edit_vendor else '' }}">
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">{{ '수정하기' if edit_vendor else '저장하기' }}</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 등록된 업체 목록 -->
+    <div class="table-section">
+      <h3 class="section-title">등록된 공급업체</h3>
+      <table id="vendorsTable" class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>업체명</th>
+            <th>담당자</th>
+            <th>전화번호</th>
+            <th>주소</th>
+            <th>이메일</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vendors %}
+          <tr>
+            <td>{{ v.vendors_name }}</td>
+            <td>{{ v.contact_person }}</td>
+            <td>{{ v.phone }}</td>
+            <td>{{ v.address }}</td>
+            <td>{{ v.email }}</td>
+            <td>
+              <a href="?edit_id={{ v.vendors_seq }}" class="text-primary">수정</a> |
+              <a href="?delete_id={{ v.vendors_seq }}" class="text-danger">삭제</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('#vendorsTable').DataTable();
+    });
+  </script>
+</body>
+</html>

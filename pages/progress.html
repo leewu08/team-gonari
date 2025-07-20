@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class="row">
+  {% for item in progress_data %}
+  <div class="col-lg-6 mb-4">
+    <div class="card shadow border">
+      <div class="card-header pb-0">
+        <h6 class="mb-0">{{ item.contract_name }} – {{ item.process_name }}</h6>
+        <p class="text-xs text-secondary mb-0">
+          {{ item.material_name }} (계획 {{ item.planned_quantity }}{{ item.unit }})
+        </p>
+      </div>
+
+      <div class="card-body pt-3">
+
+        <!-- 자재 사용률 -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span class="text-sm">📦 자재 사용률</span>
+            <span class="text-sm fw-bold">{{ item.material_percent }}%</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar bg-gradient-primary"
+                 style="width: {{ item.material_percent }}%;"></div>
+          </div>
+        </div>
+
+        <!-- 일정 진행률 -->
+        <div class="mb-1">
+          <div class="d-flex justify-content-between">
+            <span class="text-sm">⏱️ 일정 진행률</span>
+            <span class="text-sm fw-bold">{{ item.time_percent }}%</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar
+                 {% if item.time_percent >= 90 %} bg-gradient-danger
+                 {% elif item.time_percent >= 60 %} bg-gradient-warning
+                 {% else %} bg-gradient-success
+                 {% endif %}"
+                 style="width: {{ item.time_percent }}%;"></div>
+          </div>
+        </div>
+
+        
+<p class="text-xs mt-2 mb-0">
+  마감&nbsp;D-{{ 0 if item.days_left < 0 else item.days_left }}
+  ({{ item.start_date.strftime('%Y-%m-%d') }} ~ {{ item.end_date.strftime('%Y-%m-%d') }})
+</p>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

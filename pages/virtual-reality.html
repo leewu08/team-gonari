@@ -1,0 +1,53 @@
+{%extends 'base.html'%}
+
+{% block main %}
+<div class="row">
+  {% for item in progress_data %}
+  <div class="col-md-6 mb-4">
+    <div class="card shadow border">
+      <div class="card-header pb-0">
+        <h6 class="mb-0">{{ item.contract }} - {{ item.process }}</h6>
+        <p class="text-xs text-secondary mb-0">{{ item.material }} (계획량: {{ item.planned }})</p>
+      </div>
+      <div class="card-body pt-3">
+
+        <!-- ⏱️ 기간 진척률 -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span class="text-sm">⏱️ 데드 라인</span>
+            <span class="text-sm fw-bold">{{ item.time_percent }}%</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar 
+                        {% if item.time_percent >= 80 %} bg-gradient-success 
+                        {% elif item.time_percent >= 50 %} bg-gradient-warning 
+                        {% else %} bg-gradient-danger {% endif %}"
+                 role="progressbar" style="width: {{ item.time_percent }}%;"
+                 aria-valuenow="{{ item.time_percent }}" aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+        </div>
+
+        <!-- 📦 자재 사용률 -->
+        <div class="mb-1">
+          <div class="d-flex justify-content-between">
+            <span class="text-sm">📦 자재 사용률</span>
+            <span class="text-sm fw-bold">{{ item.usage_percent }}% ({{ item.used }} / {{ item.planned }})</span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar 
+                        {% if item.usage_percent >= 80 %} bg-gradient-success 
+                        {% elif item.usage_percent >= 50 %} bg-gradient-warning 
+                        {% else %} bg-gradient-danger {% endif %}"
+                 role="progressbar" style="width: {{ item.usage_percent }}%;"
+                 aria-valuenow="{{ item.usage_percent }}" aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

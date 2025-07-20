@@ -1,0 +1,31 @@
+<!-- pages/partials/sidebar.html (수정 버전) -->
+<ul class="navbar-nav">
+  {% set current_endpoint = request.endpoint %}
+
+  {# (endpoint, material-icon, label) #}
+  {% set nav_items = [
+    ("index",                         "dashboard",      "Dashboard"),
+    ("progress_dashboard",            "insights",       "Progress"),
+    ("attendance.attendance_summary", "schedule",       "Attendance"),
+    ("work_order_page",               "assignment_turned_in", "Work&nbsp;Orders"),
+    ("work_logs_page",                "description",    "Work&nbsp;Logs"),
+    ("vendors_page",                  "store",          "Vendors"),
+    ("transactions_page",             "paid",           "Transactions"),
+    ("billing",                       "receipt_long",   "Billing"),
+    ("map_page",                      "map",            "Map"),
+    ("notifications",                 "notifications",  "Notifications"),
+    ("profile",                       "person",         "Profile"),
+    ("sign_in",                       "login",          "Sign&nbsp;In"),
+    ("sign_up",                       "assignment",     "Sign&nbsp;Up")
+  ] %}
+
+  {% for ep, icon, label in nav_items %}
+  <li class="nav-item">
+    <a class="nav-link {% if current_endpoint == ep %}active bg-gradient-dark text-white{% else %}text-dark{% endif %}"
+       href="{{ url_for(ep) }}">
+      <i class="material-symbols-rounded opacity-5">{{ icon }}</i>
+      <span class="nav-link-text ms-1">{{ label | safe }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>

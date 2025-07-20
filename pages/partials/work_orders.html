@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>작업지시 관리</title>
+
+  <!-- Bootstrap + DataTables CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+  <style>
+    html, body { height: 100vh; margin:0; padding:0; font-family:'Segoe UI',sans-serif; background:#f8f9fa; overflow:hidden; }
+    .top-section    { height:50vh; overflow-y:auto; }
+    .bottom-section { height:50vh; overflow-y:auto; }
+    .section-title  { margin-bottom:20px; border-bottom:2px solid #333; padding-bottom:5px; }
+    .form-section,.table-section { background:#fff; padding:20px; margin:10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+    .material-group .row { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+  <!-- ────────────── 상단: 작업지시 등록 ────────────── -->
+  <div class="top-section">
+    <div class="form-section container-fluid">
+      <h3 class="section-title">작업지시 등록</h3>
+
+      <form id="orderForm" method="post">
+        <input type="hidden" name="mode" value="add">
+
+        <!-- 기본 정보 -->
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">지시번호</label>
+            <input class="form-control" name="contract_number" required>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">지시명</label>
+            <input class="form-control" name="contract_name" required>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">구역번호</label>
+            <input class="form-control" name="site_number">
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">구역명</label>
+            <input class="form-control" name="site_name">
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">공정명</label>
+            <input class="form-control" name="process_name" required>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">시작일</label>
+            <input type="date" class="form-control" name="start_date">
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">종료일</label>
+            <input type="date" class="form-control" name="end_date">
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label">계획수량</label>
+            <input type="number" step="any" class="form-control" name="planned_quantity" required>
+          </div>
+        </div>
+
+        <!-- 자재 목록 -->
+        <h5 class="mt-4">자재 목록</h5>
+        <div id="material-container" class="material-group">
+          <div class="row g-2">
+            <div class="col">
+              <input class="form-control" name="material_name[]" placeholder="자재명" required>
+            </div>
+            <div class="col">
+              <input class="form-control" name="unit[]" placeholder="단위" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="d-flex gap-3 mt-3">
+          <button type="button" class="btn btn-primary" onclick="addMaterialField()">+ 자재 추가</button>
+          <button type="submit" class="btn btn-success flex-grow-1">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ────────────── 하단: 작업지시 목록 ────────────── -->
+  <div class="bottom-section">
+    <div class="table-section container-fluid">
+      <h3 class="section-title">작업지시 목록 (총 {{ work_orders|length }} 건)</h3>
+
+      <table id="ordersTable" class="table table-striped" style="width:100%">
+        <thead>
+          <tr>
+            <th>오더번호</th>
+            <th>계약코드</th>
+            <th>공사명</th>
+            <th>구역코드</th>
+            <th>구역명</th>
+            <th>공정명</th>
+            <th>자재명</th>
+            <th>자재단위</th>
+            <th>시작예정일</th>
+            <th>종료예정일</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in work_orders %}
+          <tr>
+            <td>{{ r.orders_seq }}</td>
+            <td>{{ r.contract_number }}</td>
+            <td>{{ r.contract_name }}</td>
+            <td>{{ r.site_number }}</td>
+            <td>{{ r.site_name }}</td>
+            <td>{{ r.process_name }}</td>
+            <td>{{ r.material_name }}</td>
+            <td>{{ r.unit }}</td>
+            <td>{{ r.start_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ r.end_date.strftime('%Y-%m-%d') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script>
+    // DataTables 초기화
+    $(document).ready(function () {
+      $('#ordersTable').DataTable({ language:{ url:'//cdn.datatables.net/plug-ins/1.13.6/i18n/ko.json' }});
+    });
+
+    // 자재 입력행 추가
+    function addMaterialField () {
+      const row = document.createElement('div');
+      row.className = 'row g-2';
+      row.innerHTML = `
+        <div class="col">
+          <input class="form-control" name="material_name[]" placeholder="자재명" required>
+        </div>
+        <div class="col">
+          <input class="form-control" name="unit[]" placeholder="단위" required>
+        </div>`;
+      document.getElementById('material-container').appendChild(row);
+    }
+  </script>
+</body>
+</html>

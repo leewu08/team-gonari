@@ -1,0 +1,64 @@
+{% extends 'base.html' %}   {# 선택: 공통 레이아웃 상속 #}
+
+{% block main %}
+<div class="card my-4">
+  <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+    <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+      <h6 class="text-white text-capitalize ps-3">직원별 출석 성실도</h6>
+    </div>
+  </div>
+
+  <div class="card-body px-0 pb-2">
+    <div class="table-responsive p-0">
+      <table class="table align-items-center mb-0">
+        <thead>
+          <tr>
+            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">직원</th>
+            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">총횟수</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">지각</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">성실도</th>
+            <th class="text-secondary opacity-7"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+        {% for r in records %}
+          <tr>
+            <!-- 직원 이름 -->
+            <td>
+              <h6 class="mb-0 text-sm ps-3">{{ r.emp_name }}</h6>
+            </td>
+
+            <!-- 총 출근 횟수 -->
+            <td>
+              <p class="text-xs font-weight-bold mb-0">{{ r.total }}</p>
+            </td>
+
+            <!-- 지각 횟수 -->
+            <td class="align-middle text-center text-sm">
+              <span class="badge badge-sm bg-gradient-danger">{{ r.late }}</span>
+            </td>
+
+            <!-- 성실도 Progress bar -->
+            <td class="align-middle">
+              <div class="d-flex align-items-center">
+                <span class="me-2 text-xs font-weight-bold">{{ r.perf_pct }}%</span>
+                <div class="progress w-100">
+                  <div class="progress-bar bg-gradient-success"
+                       role="progressbar"
+                       style="width: {{ r.perf_pct }}%;"></div>
+                </div>
+              </div>
+            </td>
+
+            <td class="align-middle text-center">
+              <!-- 필요 시 상세 링크 등 -->
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

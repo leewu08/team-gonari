@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>작업일지 등록</title>
+
+  <!-- Bootstrap + DataTables -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .section-title {
+      border-bottom: 2px solid #333;
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .form-section, .table-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+
+    .material-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .material-row input {
+      flex: 1;
+    }
+
+    .remove-btn {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+
+    <!-- 등록 폼 -->
+    <div class="form-section">
+      <h3 class="section-title">작업일지 등록</h3>
+      <form method="POST">
+        <input type="hidden" name="mode" value="add">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">작업일</label>
+            <input type="date" name="work_date" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">작업지시</label>
+            <select name="orders_seq" class="form-select">
+              {% for order in work_orders %}
+              <option value="{{ order.orders_seq }}">{{ order.contract_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">이미지 경로</label>
+            <input type="text" name="img_path" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">구역번호</label>
+            <input name="site_number" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">구역명</label>
+            <input name="site_name" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">작업내용</label>
+            <input name="task_description" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">반장</label>
+            <input name="foreman" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">작업자</label>
+            <input name="workers" class="form-control">
+          </div>
+        </div>
+
+        <!-- 자재 입력 -->
+        <h5 class="mt-4">자재소모 입력 (1:N)</h5>
+        <div id="materials">
+          <div class="material-row">
+            <input name="material_name[]" class="form-control" placeholder="자재명" required>
+            <input name="quantity_used[]" type="number" class="form-control" placeholder="수량" required>
+            <input name="unit[]" class="form-control" placeholder="단위" required>
+          </div>
+        </div>
+        <div class="mt-2">
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="addMaterialRow()">+ 자재 추가</button>
+        </div>
+
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">등록</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 등록된 목록 -->
+    <div class="table-section">
+      <h3 class="section-title">작업일지 목록</h3>
+      <table id="workLogTable" class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>번호</th><th>작업일</th><th>작업내용</th><th>자재</th><th>수량</th><th>단위</th><th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in work_logs %}
+          <tr>
+            <td>{{ log.logs_seq }}</td>
+            <td>{{ log.work_date }}</td>
+            <td>{{ log.task_description }}</td>
+            <td>{{ log.material_name }}</td>
+            <td>{{ log.quantity_used }}</td>
+            <td>{{ log.unit }}</td>
+            <td>
+              <a href="?edit_id={{ log.logs_seq }}" class="text-primary">수정</a> |
+              <a href="?delete_id={{ log.logs_seq }}" class="text-danger" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('#workLogTable').DataTable();
+    });
+
+    function addMaterialRow() {
+      const container = document.getElementById('materials');
+      const row = document.createElement('div');
+      row.classList.add('material-row');
+      row.innerHTML = `
+        <input name="material_name[]" class="form-control" placeholder="자재명" required>
+        <input name="quantity_used[]" type="number" class="form-control" placeholder="수량" required>
+        <input name="unit[]" class="form-control" placeholder="단위" required>
+        <button type="button" class="btn btn-outline-danger remove-btn" onclick="this.parentElement.remove()">삭제</button>
+      `;
+      container.appendChild(row);
+    }
+  </script>
+</body>
+</html>

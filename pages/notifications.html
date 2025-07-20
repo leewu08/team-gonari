@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>사고사례 PDF 저장</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .pdf-button {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      z-index: 9999;
+    }
+
+    .text-sm {
+      font-size: 0.9rem;
+    }
+
+    .alert {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ✅ PDF 저장 버튼 -->
+  <button onclick="downloadPDF()" class="btn btn-outline-dark pdf-button">PDF 변환</button>
+
+  <!-- ✅ PDF로 저장할 전체 영역 -->
+  <div id="pdf-content" class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card shadow">
+          <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">사고 대응 매뉴얼</h5>
+          </div>
+
+          <div>
+          <div class="card-header"><font color="navy"><b>■ 유사 사고 사례</b></font></div>
+          <div class="card-body">
+
+
+            <!-- ✅ 사고 사례 1~5 -->
+            <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span>
+                1. 사고객체: 건설공구 > 공구류<br>
+                사고원인: 보안경 미착용 및 불안전한 작업자세<br>
+                공종: 기계설비 > 기계설비공사<br>
+                작업프로세스: 조립작업<br>
+                장소: 업무시설 / 내부<br>
+                부위: 공구류 / 지하<br>
+                대응 대책: 관련 근로자 보안경 일체형 안전모 지급 및 사용상태 확인을 통한 원인 규명과 재발 방지 대책 수립.<br>
+                <font color="blue">유사도: 0.8884</font>
+              </span>
+            </div>
+
+            <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span class="text-sm">
+                2. 사고객체: 건설공구 > 공구류<br>
+                사고원인: 공도구사용 미숙에 따른 근로자의 불안전한 행동<br>
+                공종: 건축 > 철근콘크리트공사<br>
+                작업프로세스: 설치작업<br>
+                장소: 교육연구시설 / 교육동 1층 거푸집작업<br>
+                부위: 공구류 / 스킬<br>
+                대응 대책: 공도구 작업 시 작업공간 확보, 사용 근로자에 대한 위험성 교육 및 공도구 점검 수시 확인, 슬라브 및 보 설치 작업 시 개인공도구에 대한 위험예지활동 강화.<br>
+               <font color="blue"> 유사도: 0.8871</font>
+              </span>
+            </div>
+
+           <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span class="text-sm">
+                3. 사고객체: 건설기계 > 콘크리트펌프<br>
+                사고원인: 작업자 개인 안전보호구 미착용 및 불안전한 행동<br>
+                공종: 건축 > 철근콘크리트공사<br>
+                작업프로세스: 타설작업<br>
+                장소: 근린생활시설 / 내부<br>
+                부위: 콘크리트펌프 / 옆<br>
+                대응 대책: 현장책임자에 대한 관리 감독 철저와 유사사고 재발 방지를 위한 TBM시간 활용 안전교육 실시.<br>
+               <font color="blue">유사도: 0.8854</font> 
+              </span>
+            </div>
+
+            <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span class="text-sm">
+                4. 사고객체: 건설공구 > 공구류<br>
+                사고원인: 작업수칙 미준수 및 불안전한 행동<br>
+                공종: 건축 > 목공사<br>
+                작업프로세스: 절단작업<br>
+                장소: 업무시설 / 내부<br>
+                부위: 공구류 / 바닥<br>
+                대응 대책: 사고 재발 방지 교육 실시와 위험성 평가 강화를 포함한 향후 조치 계획.<br>
+                <font color="blue">유사도: 0.8853</font>
+              </span>
+            </div>
+
+           <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span class="text-sm">
+                5. 사고객체: 건설자재 > 자재<br>
+                사고원인: 안전수칙 미준수로 인한 작업자의 불안전한 행동<br>
+                공종: 건축 > 해체 및 철거공사<br>
+                작업프로세스: 이동<br>
+                장소: 창고시설 / 내부<br>
+                부위: 자재 / 옆<br>
+                대응 대책: 안전수칙 준수에 따른 작업자의 안전 사항 철저함.<br>
+                <font color="blue">유사도: 0.8839</font>
+              </span>
+            </div>
+          </div>
+
+
+          <div>
+          <div class="card-header"><font color="navy"><b>■ 자동화 레포트</b></font></div>
+          <div class="card-body">
+
+
+            <!-- ✅ 분석 및 결론 -->
+           <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span class="text-sm">
+                <strong>[분석]</strong><br>
+                기준 사고는 건설공구 중 공구류이며, 보안면 미착용과 숫돌 측면 사용이라는 인적요인이 핵심입니다.<br>
+                유사사례들은 보호구 착용, 점검, 공간 확보, 교육을 강조합니다.<br>
+                특히 사례 2번과 4번은 공간관리와 예지활동, 위험성 평가의 중요성을 보여줍니다.
+              </span>
+            </div>
+
+            <!-- ✅ 최종 대응 대책 -->
+              <div class="alert alert-secondary" style="background: #dddddd;  font-family: '맑은 고딕'">
+              <span class="text-sm">
+                <strong>[대응대책]</strong><br>
+                보안면 착용 의무화 및 사용 전 점검 시스템 도입, 핸드그라인더 작업 시 숫돌 정확한 위치 사용법 교육 강화, 현장 안전관리자 주관 수시 위험예지활동 실시와 함께 공구 작업 공간 확보를 통한 재발 방지를 위한 종합안전점검 체계를 구축한다.
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    function downloadPDF() {
+      const element = document.getElementById("pdf-content");
+      const opt = {
+        margin: 0.3,
+        filename: '사고사례_분석.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+  </script>
+</body>
+
+</html>
