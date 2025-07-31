@@ -1,15 +1,7 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <title>작업지시 관리</title>
-
-  <!-- Bootstrap + DataTables CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-
+{%extends 'base.html'%}
+{% block main %}
   <style>
-    html, body { height: 100vh; margin:0; padding:0; font-family:'Segoe UI',sans-serif; background:#f8f9fa; overflow:hidden; }
+    html, body { height:100vh; margin:0; padding:0; font-family:'Segoe UI',sans-serif; background:#f8f9fa; overflow:hidden; }
     .top-section    { height:50vh; overflow-y:auto; }
     .bottom-section { height:50vh; overflow-y:auto; }
     .section-title  { margin-bottom:20px; border-bottom:2px solid #333; padding-bottom:5px; }
@@ -31,35 +23,35 @@
         <div class="row g-3">
           <div class="col-md-6 col-lg-3">
             <label class="form-label">지시번호</label>
-            <input class="form-control" name="contract_number" required>
+            <input class="form-control" name="contract_number" id="contract_number" required>
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">지시명</label>
-            <input class="form-control" name="contract_name" required>
+            <input class="form-control" name="contract_name" id="contract_name" required>
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">구역번호</label>
-            <input class="form-control" name="site_number">
+            <input class="form-control" name="site_number" id="site_number">
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">구역명</label>
-            <input class="form-control" name="site_name">
+            <input class="form-control" name="site_name" id="site_name">
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">공정명</label>
-            <input class="form-control" name="process_name" required>
+            <input class="form-control" name="process_name" id="process_name" required>
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">시작일</label>
-            <input type="date" class="form-control" name="start_date">
+            <input type="date" class="form-control" name="start_date" id="start_date">
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">종료일</label>
-            <input type="date" class="form-control" name="end_date">
+            <input type="date" class="form-control" name="end_date" id="end_date">
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label">계획수량</label>
-            <input type="number" step="any" class="form-control" name="planned_quantity" required>
+            <input type="number" step="any" class="form-control" name="planned_quantity" id="planned_quantity" required>
           </div>
         </div>
 
@@ -103,6 +95,8 @@
             <th>자재단위</th>
             <th>시작예정일</th>
             <th>종료예정일</th>
+            <th>수정</th>
+            <th>삭제</th>
           </tr>
         </thead>
         <tbody>
@@ -118,6 +112,22 @@
             <td>{{ r.unit }}</td>
             <td>{{ r.start_date.strftime('%Y-%m-%d') }}</td>
             <td>{{ r.end_date.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary"
+                      onclick="editOrder(this)"
+                      data-orders_seq="{{ r.orders_seq }}"
+                      data-contract_number="{{ r.contract_number }}"
+                      data-contract_name="{{ r.contract_name }}"
+                      data-site_number="{{ r.site_number }}"
+                      data-site_name="{{ r.site_name }}"
+                      data-process_name="{{ r.process_name }}"
+                      data-start_date="{{ r.start_date.strftime('%Y-%m-%d') }}"
+                      data-end_date="{{ r.end_date.strftime('%Y-%m-%d') }}"
+                      data-planned_quantity="{{ r.planned_quantity }}">
+                수정
+              </button>
+            </td>
+            <td><button class="btn btn-sm btn-outline-danger" onclick="deleteOrder({{ r.orders_seq }})">삭제</button></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -130,12 +140,10 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
   <script>
-    // DataTables 초기화
     $(document).ready(function () {
       $('#ordersTable').DataTable({ language:{ url:'//cdn.datatables.net/plug-ins/1.13.6/i18n/ko.json' }});
     });
 
-    // 자재 입력행 추가
     function addMaterialField () {
       const row = document.createElement('div');
       row.className = 'row g-2';
@@ -148,6 +156,28 @@
         </div>`;
       document.getElementById('material-container').appendChild(row);
     }
+
+    function editOrder(btn) {
+      document.querySelector('#contract_number').value     = btn.dataset.contract_number;
+      document.querySelector('#contract_name').value       = btn.dataset.contract_name;
+      document.querySelector('#site_number').value         = btn.dataset.site_number;
+      document.querySelector('#site_name').value           = btn.dataset.site_name;
+      document.querySelector('#process_name').value        = btn.dataset.process_name;
+      document.querySelector('#start_date').value          = btn.dataset.start_date;
+      document.querySelector('#end_date').value            = btn.dataset.end_date;
+      document.querySelector('#planned_quantity').value    = btn.dataset.planned_quantity;
+
+      // hidden으로 orders_seq 저장
+      if (!document.querySelector('#orders_seq')) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'orders_seq';
+        hiddenInput.id = 'orders_seq';
+        document.querySelector('#orderForm').appendChild(hiddenInput);
+      }
+      document.querySelector('#orders_seq').value = btn.dataset.orders_seq;
+      document.querySelector('input[name="mode"]').value = 'update';
+    }
   </script>
 </body>
-</html>
+{% endblock %}

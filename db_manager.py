@@ -1,19 +1,15 @@
 import cx_Oracle
 from datetime import datetime, date
-
+from typing import Optional, Dict, List
 
 class DBManager:
-    # ─────────────────────────────────────────────
-    # 0) 연결 헬퍼
-    # ─────────────────────────────────────────────
     def __init__(self):
-        self.connection = None          # cx_Oracle.Connection
-        self.cursor     = None          # cx_Oracle.Cursor
+        self.connection = None
+        self.cursor = None
 
     def connect(self):
-        """필요할 때 연결·커서 생성(이미 있으면 재사용)"""
         if self.connection is None:
-            dsn = cx_Oracle.makedsn("10.0.66.42", 1521, service_name="xe")
+            dsn = cx_Oracle.makedsn("172.30.1.25", 1521, service_name="xe")
             self.connection = cx_Oracle.connect(
                 user="sauser",
                 password="0000",
@@ -24,7 +20,6 @@ class DBManager:
             self.cursor = self.connection.cursor()
 
     def disconnect(self):
-        """커서 → 연결 순서로 닫고 초기화"""
         if self.cursor:
             self.cursor.close()
             self.cursor = None
@@ -32,10 +27,7 @@ class DBManager:
             self.connection.close()
             self.connection = None
 
-    # ─────────────────────────────────────────────
-    # 공통 SELECT → list[dict]
-    # ─────────────────────────────────────────────
-    def fetch_all(self, sql: str, params: dict | None = None):
+    def fetch_all(self, sql: str, params: Optional[Dict] = None) -> List[Dict]:
         self.connect()
         cur = self.connection.cursor()
         cur.execute(sql, params or {})
@@ -45,12 +37,19 @@ class DBManager:
         self.disconnect()
         return rows
 
-    # ============================================================
-    # 1) work_orders CRUD
-    # ============================================================
-    def insert_work_order(self, contract_number, contract_name, site_number, site_name,
-                          process_name, material_name, planned_quantity, unit,
-                          start_date, end_date):
+    def insert_work_order(
+        self,
+        contract_number: str,
+        contract_name: str,
+        site_number: str,
+        site_name: str,
+        process_name: str,
+        material_name: str,
+        planned_quantity: float,
+        unit: str,
+        start_date: Optional[datetime],
+        end_date: Optional[datetime]
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -76,21 +75,27 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def get_all_work_orders(self):
-        return self.fetch_all(
-            "SELECT * FROM work_orders ORDER BY orders_seq DESC"
-        )
+    def get_all_work_orders(self) -> List[Dict]:
+        return self.fetch_all("SELECT * FROM work_orders ORDER BY orders_seq DESC")
 
-    def get_work_order_by_id(self, orders_seq):
-        rows = self.fetch_all(
-            "SELECT * FROM work_orders WHERE orders_seq = :id",
-            {"id": orders_seq}
-        )
+    def get_work_order_by_id(self, orders_seq: int) -> Optional[Dict]:
+        rows = self.fetch_all("SELECT * FROM work_orders WHERE orders_seq = :id", {"id": orders_seq})
         return rows[0] if rows else None
 
-    def update_work_order(self, orders_seq, contract_number, contract_name, site_number,
-                          site_name, process_name, material_name, planned_quantity,
-                          unit, start_date, end_date):
+    def update_work_order(
+        self,
+        orders_seq: int,
+        contract_number: str,
+        contract_name: str,
+        site_number: str,
+        site_name: str,
+        process_name: str,
+        material_name: str,
+        planned_quantity: float,
+        unit: str,
+        start_date: datetime,
+        end_date: datetime
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -121,12 +126,12 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def delete_work_order(self, orders_seq):
+    def delete_work_order(self, orders_seq: int) -> bool:
         try:
             self.connect()
-            self.cursor.execute("DELETE FROM work_logs            WHERE orders_seq = :1", (orders_seq,))
+            self.cursor.execute("DELETE FROM work_logs WHERE orders_seq = :1", (orders_seq,))
             self.cursor.execute("DELETE FROM material_transactions WHERE orders_seq = :1", (orders_seq,))
-            self.cursor.execute("DELETE FROM work_orders          WHERE orders_seq = :1", (orders_seq,))
+            self.cursor.execute("DELETE FROM work_orders WHERE orders_seq = :1", (orders_seq,))
             self.connection.commit()
             return True
         except cx_Oracle.Error as e:
@@ -135,13 +140,25 @@ class DBManager:
             return False
         finally:
             self.disconnect()
-
-    # ============================================================
+  # ============================================================
     # 2) work_logs CRUD
     # ============================================================
-    def insert_work_log(self, orders_seq, work_date, site_number, site_name,
-                        task_description, foreman, workers, material_name,
-                        quantity_used, unit, img_path):
+
+    # 작업일지 등록
+    def insert_work_log(
+        self,
+        orders_seq: int,
+        work_date: datetime,
+        site_number: str,
+        site_name: str,
+        task_description: str,
+        foreman: str,
+        workers: int,
+        material_name: str,
+        quantity_used: float,
+        unit: str,
+        img_path: str
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -167,21 +184,31 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def get_all_work_logs(self):
-        return self.fetch_all(
-            "SELECT * FROM work_logs ORDER BY logs_seq DESC"
-        )
+    # 작업일지 전체 조회
+    def get_all_work_logs(self) -> List[Dict]:
+        return self.fetch_all("SELECT * FROM work_logs ORDER BY logs_seq DESC")
 
-    def get_work_log_by_id(self, logs_seq):
-        rows = self.fetch_all(
-            "SELECT * FROM work_logs WHERE logs_seq = :id",
-            {"id": logs_seq}
-        )
+    # 작업일지 단건 조회
+    def get_work_log_by_id(self, logs_seq: int) -> Optional[Dict]:
+        rows = self.fetch_all("SELECT * FROM work_logs WHERE logs_seq = :id", {"id": logs_seq})
         return rows[0] if rows else None
 
-    def update_work_log(self, logs_seq, orders_seq, work_date, site_number, site_name,
-                        task_description, foreman, workers, material_name,
-                        quantity_used, unit, img_path):
+    # 작업일지 수정
+    def update_work_log(
+        self,
+        logs_seq: int,
+        orders_seq: int,
+        work_date: datetime,
+        site_number: str,
+        site_name: str,
+        task_description: str,
+        foreman: str,
+        workers: int,
+        material_name: str,
+        quantity_used: float,
+        unit: str,
+        img_path: str
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -213,7 +240,8 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def delete_work_log(self, logs_seq):
+    # 작업일지 삭제
+    def delete_work_log(self, logs_seq: int) -> bool:
         try:
             self.connect()
             self.cursor.execute("DELETE FROM work_logs WHERE logs_seq = :1", (logs_seq,))
@@ -229,19 +257,25 @@ class DBManager:
     # ============================================================
     # 3) vendors CRUD
     # ============================================================
-    def get_all_vendors(self):
-        return self.fetch_all(
-            "SELECT * FROM vendors ORDER BY vendors_seq DESC"
-        )
 
-    def get_vendor_by_id(self, vendors_seq):
-        rows = self.fetch_all(
-            "SELECT * FROM vendors WHERE vendors_seq = :id",
-            {"id": vendors_seq}
-        )
+    # 공급업체 전체 조회
+    def get_all_vendors(self) -> List[Dict]:
+        return self.fetch_all("SELECT * FROM vendors ORDER BY vendors_seq DESC")
+
+    # 공급업체 단건 조회
+    def get_vendor_by_id(self, vendors_seq: int) -> Optional[Dict]:
+        rows = self.fetch_all("SELECT * FROM vendors WHERE vendors_seq = :id", {"id": vendors_seq})
         return rows[0] if rows else None
 
-    def insert_vendor(self, vendors_name, contact_person, phone, address, email):
+    # 공급업체 등록
+    def insert_vendor(
+        self,
+        vendors_name: str,
+        contact_person: str,
+        phone: str,
+        address: str,
+        email: str
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -264,7 +298,16 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def update_vendor(self, vendors_seq, vendors_name, contact_person, phone, address, email):
+    # 공급업체 수정
+    def update_vendor(
+        self,
+        vendors_seq: int,
+        vendors_name: str,
+        contact_person: str,
+        phone: str,
+        address: str,
+        email: str
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -288,12 +331,11 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def delete_vendor(self, vendors_seq):
+    # 공급업체 삭제
+    def delete_vendor(self, vendors_seq: int) -> bool:
         try:
             self.connect()
-            self.cursor.execute(
-                "DELETE FROM vendors WHERE vendors_seq = :1", (vendors_seq,)
-            )
+            self.cursor.execute("DELETE FROM vendors WHERE vendors_seq = :1", (vendors_seq,))
             self.connection.commit()
             return True
         except cx_Oracle.Error as e:
@@ -303,24 +345,32 @@ class DBManager:
         finally:
             self.disconnect()
 
+
     # ============================================================
     # 4) material_transactions CRUD
     # ============================================================
-    def get_all_material_transactions(self):
-        return self.fetch_all(
-            "SELECT * FROM material_transactions ORDER BY trans_seq DESC"
-        )
 
-    def get_transaction_by_id(self, trans_seq):
-        rows = self.fetch_all(
-            "SELECT * FROM material_transactions WHERE trans_seq = :id",
-            {"id": trans_seq}
-        )
+    # 자재 거래 전체 조회
+    def get_all_material_transactions(self) -> List[Dict]:
+        return self.fetch_all("SELECT * FROM material_transactions ORDER BY trans_seq DESC")
+
+    # 자재 거래 단건 조회
+    def get_transaction_by_id(self, trans_seq: int) -> Optional[Dict]:
+        rows = self.fetch_all("SELECT * FROM material_transactions WHERE trans_seq = :id", {"id": trans_seq})
         return rows[0] if rows else None
 
-    def insert_material_transaction(self, transaction_date, vendors_seq,
-                                    material_name, quantity, unit, price,
-                                    orders_seq, img_path):
+    # 자재 거래 등록 (단건)
+    def insert_material_transaction(
+        self,
+        transaction_date: Optional[datetime],
+        vendors_seq: int,
+        material_name: str,
+        quantity: float,
+        unit: str,
+        price: float,
+        orders_seq: int,
+        img_path: str
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -344,8 +394,14 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def insert_material_transactions(self, transaction_date, vendors_seq,
-                                     orders_seq, materials: list):
+    # 자재 거래 등록 (복수)
+    def insert_material_transactions(
+        self,
+        transaction_date: Optional[datetime],
+        vendors_seq: int,
+        orders_seq: int,
+        materials: List[Dict]
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -376,9 +432,19 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def update_material_transaction(self, trans_seq, transaction_date, vendors_seq,
-                                    material_name, quantity, unit, price,
-                                    orders_seq, img_path):
+    # 자재 거래 수정
+    def update_material_transaction(
+        self,
+        trans_seq: int,
+        transaction_date: datetime,
+        vendors_seq: int,
+        material_name: str,
+        quantity: float,
+        unit: str,
+        price: float,
+        orders_seq: int,
+        img_path: str
+    ) -> bool:
         try:
             self.connect()
             sql = """
@@ -406,13 +472,11 @@ class DBManager:
         finally:
             self.disconnect()
 
-    def delete_material_transaction(self, trans_seq):
+    # 자재 거래 삭제
+    def delete_material_transaction(self, trans_seq: int) -> bool:
         try:
             self.connect()
-            self.cursor.execute(
-                "DELETE FROM material_transactions WHERE trans_seq = :1",
-                (trans_seq,)
-            )
+            self.cursor.execute("DELETE FROM material_transactions WHERE trans_seq = :1", (trans_seq,))
             self.connection.commit()
             return True
         except cx_Oracle.Error as e:
@@ -425,7 +489,9 @@ class DBManager:
     # ============================================================
     # 5) 집계 메서드 (대시보드)
     # ============================================================
-    def get_progress_data(self):
+
+    # 공정 진행률 계산
+    def get_progress_data(self) -> List[Dict]:
         sql = """
         SELECT  o.orders_seq                 AS order_id,
                 o.contract_name,
@@ -446,34 +512,31 @@ class DBManager:
         ORDER  BY o.end_date
         """
         rows  = self.fetch_all(sql)
-        today = date.today()                     # 옵션 A: date 객체
+        today = date.today()
 
         result = []
         for r in rows:
-            # 날짜 타입 맞추기 ──────────────────────
             s_date = r["start_date"].date() if isinstance(r["start_date"], datetime) else r["start_date"]
             e_date = r["end_date"].date()   if isinstance(r["end_date"],   datetime) else r["end_date"]
 
-            # 자재 사용률 %
             planned_qty = r["planned_quantity"] or 0
             used_qty    = r["used_quantity"]    or 0
             mat_pct     = round(used_qty / planned_qty * 100, 1) if planned_qty else 0
 
-            # 일정 진행률 %
             total_days   = max((e_date - s_date).days, 1)
             elapsed_days = max((today  - s_date).days, 0)
             time_pct     = round(min(elapsed_days / total_days, 1) * 100, 1)
 
-            # 결과 dict
             result.append({
                 **r,
-                "material_percent": mat_pct,     # ← 여기서 mat_pct 사용
+                "material_percent": mat_pct,
                 "time_percent"    : time_pct,
                 "days_left"       : (e_date - today).days
             })
         return result
 
-    def get_inventory_status(self):
+    # 자재 재고 현황 집계
+    def get_inventory_status(self) -> List[Dict]:
         sql = """
         SELECT 
             mt.material_name,

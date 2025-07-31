@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <title>작업일지 등록</title>
-
-  <!-- Bootstrap + DataTables -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-
+{% extends 'base.html' %}
+{% block main %}
   <style>
     body {
       background-color: #f8f9fa;
@@ -50,61 +42,75 @@
     <div class="form-section">
       <h3 class="section-title">작업일지 등록</h3>
       <form method="POST">
-        <input type="hidden" name="mode" value="add">
+        <input type="hidden" name="mode" value="{{ 'edit' if edit_log else 'add' }}">
+        {% if edit_log %}
+        <input type="hidden" name="logs_seq" value="{{ edit_log.logs_seq }}">
+        {% endif %}
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">작업일</label>
-            <input type="date" name="work_date" class="form-control">
+            <input type="date" name="work_date" class="form-control" value="{{ edit_log.work_date if edit_log else '' }}">
           </div>
           <div class="col-md-4">
             <label class="form-label">작업지시</label>
             <select name="orders_seq" class="form-select">
               {% for order in work_orders %}
-              <option value="{{ order.orders_seq }}">{{ order.contract_name }}</option>
+              <option value="{{ order.orders_seq }}" {% if edit_log and edit_log.orders_seq == order.orders_seq %}selected{% endif %}>{{ order.contract_name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-md-4">
             <label class="form-label">이미지 경로</label>
-            <input type="text" name="img_path" class="form-control">
+            <input type="text" name="img_path" class="form-control" value="{{ edit_log.img_path if edit_log else '' }}">
           </div>
           <div class="col-md-4">
             <label class="form-label">구역번호</label>
-            <input name="site_number" class="form-control">
+            <input name="site_number" class="form-control" value="{{ edit_log.site_number if edit_log else '' }}">
           </div>
           <div class="col-md-4">
             <label class="form-label">구역명</label>
-            <input name="site_name" class="form-control">
+            <input name="site_name" class="form-control" value="{{ edit_log.site_name if edit_log else '' }}">
           </div>
           <div class="col-md-4">
             <label class="form-label">작업내용</label>
-            <input name="task_description" class="form-control">
+            <input name="task_description" class="form-control" value="{{ edit_log.task_description if edit_log else '' }}">
           </div>
           <div class="col-md-6">
             <label class="form-label">반장</label>
-            <input name="foreman" class="form-control">
+            <input name="foreman" class="form-control" value="{{ edit_log.foreman if edit_log else '' }}">
           </div>
           <div class="col-md-6">
             <label class="form-label">작업자</label>
-            <input name="workers" class="form-control">
+            <input name="workers" class="form-control" value="{{ edit_log.workers if edit_log else '' }}">
           </div>
         </div>
 
         <!-- 자재 입력 -->
         <h5 class="mt-4">자재소모 입력 (1:N)</h5>
         <div id="materials">
-          <div class="material-row">
-            <input name="material_name[]" class="form-control" placeholder="자재명" required>
-            <input name="quantity_used[]" type="number" class="form-control" placeholder="수량" required>
-            <input name="unit[]" class="form-control" placeholder="단위" required>
-          </div>
+          {% if edit_log and edit_log.materials %}
+            {% for mat in edit_log.materials %}
+            <div class="material-row">
+              <input name="material_name[]" class="form-control" placeholder="자재명" value="{{ mat.material_name }}" required>
+              <input name="quantity_used[]" type="number" class="form-control" placeholder="수량" value="{{ mat.quantity_used }}" required>
+              <input name="unit[]" class="form-control" placeholder="단위" value="{{ mat.unit }}" required>
+              <button type="button" class="btn btn-outline-danger remove-btn" onclick="this.parentElement.remove()">삭제</button>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="material-row">
+              <input name="material_name[]" class="form-control" placeholder="자재명" required>
+              <input name="quantity_used[]" type="number" class="form-control" placeholder="수량" required>
+              <input name="unit[]" class="form-control" placeholder="단위" required>
+            </div>
+          {% endif %}
         </div>
         <div class="mt-2">
           <button type="button" class="btn btn-outline-primary btn-sm" onclick="addMaterialRow()">+ 자재 추가</button>
         </div>
 
         <div class="mt-4">
-          <button type="submit" class="btn btn-success">등록</button>
+          <button type="submit" class="btn btn-success">{{ '수정' if edit_log else '등록' }}</button>
         </div>
       </form>
     </div>
@@ -162,4 +168,4 @@
     }
   </script>
 </body>
-</html>
+{% endblock %}
